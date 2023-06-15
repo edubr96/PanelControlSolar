@@ -1,0 +1,339 @@
+﻿@{
+    ViewBag.Title = "Inicio";
+}
+
+@model PanelControlSolar.Models.ListaDatosTiempo
+
+<h2>Panel de control</h2>
+
+<!-- DatetimeRangePicker -->
+<div>
+    <label style="margin-right: 10px;">Período:</label>
+    <input type="text" name="datetimes" style="width: 240px;" />
+</div>
+
+
+<!--Fila 1-->
+<div class="row" style="margin-top:20px">
+    <div class="col-lg-6">
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>Potencia obtenida</b> </div>
+            <div class="panel-body">
+                <canvas id="GraficoPotencia" width="100" height="60"></canvas>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-lg-6">
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>Ángulo solar</b> </div>
+            <div class="panel-body">
+                <canvas id="GraficoAngulo" width="100" height="60"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!--Fila 2-->
+<div class="row" style="margin-top:20px">
+    <div class="col-lg-6">
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>Niveles de potencia</b> </div>
+            <div class="panel-body">
+                <canvas id="TiempoActual" width="100" height="55"></canvas>
+            </div>
+        </div>
+
+    </div>
+    <div class="col-lg-6">
+        <div class="panel panel-default" style="margin-bottom:33px">
+            <div class="panel-heading"><b>Temperatura actual</b> </div>
+            <div class="panel-body" style="text-align:center">
+                <label id="temperatura" style="font-size: 30px;">@PanelControlSolar.Datos.API_DatosTiempo.temperaturaActual ºC</label>
+                <img src="~/Resources/images/termometro.png" alt="Producción total" style="vertical-align: middle; height:90px">
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>Producción total</b> </div>
+            <div class="panel-body" style="text-align:center">
+                <label id="total" style="font-size: 30px;"></label>
+                <img src="~/Resources/images/totalProduccion.jpg" alt="Producción total" style="vertical-align: middle; height:90px">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+
+    <script>
+        $(function () {
+            $('input[name="datetimes"]').daterangepicker({
+                timePicker: true,
+                startDate: moment().startOf('hour').add(-20, 'day'),
+                endDate: moment().startOf('hour'),
+                locale: {
+                    format: 'DD/MM/YYYY HH:mm' // Utiliza HH para el formato de 24 horas
+                },
+                timePicker24Hour: true // Activa el formato de 24 horas en el selector de tiempo
+            }, function (start, end, label) {
+                var fechaMinima = start.format('DD/MM/YYYY HH:mm');
+                var fechaMaxima = end.format('DD/MM/YYYY HH:mm');
+
+                $.ajax({
+                    url: '@Url.Action("ProcesarFechas", "Home")',
+                    type: 'POST',
+                    data: { fechaMinima: fechaMinima, fechaMaxima: fechaMaxima },
+                    success: function (data) {
+                        generarGraficos(data);
+                    },
+                    error: function(error) {
+                        // Manejar el error si ocurre
+                        alert("Error en la solicitud al servidor");
+                    }
+                });
+
+                //Depuración
+                console.log('Fecha mínima:', fechaMinima);
+                console.log('Fecha máxima:', fechaMaxima);
+
+            });
+        });
+    </script>
+
+
+
+    <script>
+
+        function generarGraficos(datos) {
+
+                  jQuery.ajax({
+                    url: '@Url.Action("DatosTiempo", "Home")',
+                    type: "GET",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                      success: function (data) {
+
+                      //Comprobamos si se han introducido nuevas fechas
+                      if (datos != null)
+                              data = datos;
+
+                      // Depuración
+                      console.log(data);
+
+                      var arrayFecha = [];
+                      var arrayPotencia = [];
+                      var arrayAngulo = [];
+                      var produccionTotal = 0;
+
+                      for (var i = 0; i < data.length; i++) {
+                        arrayFecha.push(data[i].Fecha);
+                        arrayPotencia.push(data[i].Potencia);
+                        arrayAngulo.push(data[i].Angulo);
+                      }
+
+                      for (var i = 0; i < arrayPotencia.length; i++) {
+                        produccionTotal += arrayPotencia[i];
+                      }
+
+                      //Depuración
+                      console.log(produccionTotal);
+
+                      // Gráfico de potencia
+                      var GraficoPotencia = document.getElementById("GraficoPotencia");
+                      var GraficoPotencia = new Chart(GraficoPotencia, {
+                        type: 'line',
+                        data: {
+                          labels: arrayFecha,
+                          datasets: [{
+                            label: "Potencia (W)",
+                            backgroundColor: "#03B100",
+                            borderColor: "#000000",
+                            borderWidth: 0,
+                            data: arrayPotencia,
+                          }],
+                        },
+                        options: {
+                          scales: {
+                            xAxes: [{
+                              gridLines: {
+                                display: true
+                              },
+                            }],
+                            yAxes: [{
+                              ticks: {
+                                min: 0,
+                              },
+                              gridLines: {
+                                display: true
+                              }
+                            }],
+                          },
+                          legend: {
+                            display: true
+                          }
+                        }
+                      });
+
+                      // Gráfico de ángulo
+                      var GraficoAngulo = document.getElementById("GraficoAngulo");
+                      var GraficoAngulo = new Chart(GraficoAngulo, {
+                        type: 'line',
+                        data: {
+                          labels: arrayFecha,
+                          datasets: [{
+                            label: "Ángulo (grados)",
+                            backgroundColor: "#0083B1",
+                            borderColor: "#000000",
+                            borderWidth: 0,
+                            data: arrayAngulo,
+                          }],
+                        },
+                        options: {
+                          scales: {
+                            xAxes: [{
+                              gridLines: {
+                                display: true
+                              },
+                            }],
+                            yAxes: [{
+                              ticks: {
+                                min: 0,
+                              },
+                              gridLines: {
+                                display: true
+                              }
+                            }],
+                          },
+                          legend: {
+                            display: true
+                          }
+                        }
+                      });
+
+                          // Obtener el total de la energía generada en el rango de fechas seleccionado
+                          var total = arrayPotencia.reduce((a, b) => a + b, 0);
+                          document.getElementById('total').textContent = (total / 1000) + ' KWh';
+
+                    }
+
+                  });
+
+                  //*******************************************************************************/
+
+                  // Datos API
+                  $.ajax({
+                     url: '@Url.Action("DatosTiempo", "Home")',
+                     type: "GET",
+                     dataType: "json",
+                     contentType: "application/json; charset=utf-8",
+                     success: function (data) {
+                       // Comprobamos si se han introducido nuevas fechas
+                       if (datos != null) {
+                         data = datos;
+                       }
+
+                       // Depuración
+                       console.log(data);
+
+                       var arrayFecha = [];
+                       var arrayPotencia = [];
+
+                       var rMaxima = [];
+                       var rMedia = [];
+                       var rMinima = [];
+
+                       for (var i = 0; i < data.length; i++) {
+                         arrayFecha.push(data[i].Fecha);
+                         arrayPotencia.push(data[i].Potencia);
+                       }
+
+                       // Realizamos la segunda llamada dentro del bloque success de la primera llamada (rescatamos los datos de la API)
+                       $.ajax({
+                         url: '@Url.Action("APIDatosTiempo", "Home")',
+                         type: 'POST',
+                         dataType: 'json',
+                         data: { fechas: arrayFecha },
+                         success: function (segundaData) {
+
+                         // Depuración
+                         console.log('Rmaxima: ' + rMaxima);
+                         console.log('Data temperaturas: ' + segundaData);
+
+                         for (var i = 0; i < segundaData.length; i++) {
+
+                         var temperatura = parseInt(segundaData[i]);
+                         rMaxima.push(data[i].Potencia + (temperatura * 0.5));
+                         rMedia.push(data[i].Potencia + (temperatura * 0.2));
+                         rMinima.push(data[i].Potencia - (temperatura * 0.5));
+                         }
+
+                           var TiempoActual = document.getElementById("TiempoActual");
+                           var TiempoActual = new Chart(TiempoActual, {
+                             type: 'line',
+                             data: {
+                               labels: arrayFecha,
+                               datasets: [{
+                                 label: "Potencia obtenida (W)",
+                                 backgroundColor: "",
+                                 borderColor: "#000000",
+                                 borderWidth: 1,
+                                 data: arrayPotencia,
+                               }, {
+                                 label: "Potencia máxima",
+                                 backgroundColor: 'rgba(255, 0, 0, 0.5)',
+                                 borderColor: 'rgba(255, 0, 0, 1)',
+                                 borderWidth: 1,
+                                 data: rMaxima,
+                               }, {
+                                 label: "Potencia media",
+                                 backgroundColor: 'rgba(255, 255, 0, 0.5)',
+                                 borderColor: 'rgba(255, 255, 0, 1)',
+                                 borderWidth: 1,
+                                 data: rMedia,
+                               }, {
+                                 label: "Potencia mínima",
+                                 backgroundColor: 'rgba(0, 255, 0, 0.7)',
+                                 borderColor: 'rgba(0, 255, 0, 1)',
+                                 borderWidth: 1,
+                                 data: rMinima,
+                               }],
+                             },
+                             options: {
+                               scales: {
+                                 xAxes: [{
+                                   gridLines: {
+                                     display: true
+                                   },
+                                 }],
+                                 yAxes: [{
+                                   ticks: {
+                                     min: 0,
+                                   },
+                                   gridLines: {
+                                     display: true
+                                   }
+                                 }],
+                               },
+                               legend: {
+                                 display: true
+                               }
+                             }
+                           });
+                         }
+                       });
+                     }
+                   });
+
+        }
+
+                // 1º llamada a la función para generar los gráficos
+                generarGraficos(null);
+
+    </script>
+
+}

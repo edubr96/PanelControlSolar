@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "Administrar configuración";
+}
+
+<h2>@ViewBag.Title</h2>
+
+
+<div class="row" style="margin-top:20px">
+    <div class="col-lg-6">
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>Ubicación de la placa solar</b> </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="codigoPostal">Código Postal:</label>
+                    <input type="text" class="form-control" id="codigoPostal" value="@PanelControlSolar.Datos.CodigoPostal.Codigopostal" />
+                </div>
+                <button type="button" class="btn btn-primary" id="btnModificar">Modificar</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+
+        <div class="panel panel-default">
+            <div class="panel-heading"><b>Gestión de usuario</b> </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label id="username" >Username: @PanelControlSolar.Models.Usuario.Nombre</label><br /><br />
+                    <button type="button" id="btnEliminarUsuario" class="btn btn-danger">Eliminar Usuario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    //Evento para modificar el CP
+    $(document).ready(function () {
+        $("#btnModificar").click(function () {
+            $.ajax({
+                 url: '@Url.Action("ModificarCodigoPostal", "Home")',
+                type: "POST", //Pasamos los datos por POST al controlador
+                data: {
+                    codigoPostal: $("#codigoPostal").val()
+                },
+                success: function () {
+                },
+                error: function () {
+                }
+            });
+        });
+    });
+
+
+     // Evento click del botón "Eliminar Usuario"
+    $('#btnEliminarUsuario').click(function () {
+
+        if (confirm("¿Está seguro de que quiere eliminar al usuario?")) {
+            // Realizar la llamada Ajax al controlador para eliminar al usuario
+            $.ajax({
+                url: '@Url.Action("EliminarUsuario", "Home")',
+                type: 'POST',
+                data: { },
+                success: function () {
+                    alert("Usuario eliminado. Será redirigido al Login.");
+                     // Redirigir al controlador y vista de Login
+                    window.location.href = '@Url.Action("Login", "Home")';
+                },
+                error: function (error) {
+                    // Manejar errores de la llamada Ajax
+                    alert('Error en la llamada Ajax: ' + error);
+                }
+            });
+        }
+    });
+</script>
+
+
+
