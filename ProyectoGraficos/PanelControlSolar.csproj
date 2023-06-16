@@ -183,6 +183,7 @@
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Resources\css\estilos.css" />
+    <Content Include="Resources\images\background-login.jpg" />
     <Content Include="Resources\images\termometro.png" />
     <Content Include="Resources\images\totalProduccion.jpg" />
     <Content Include="Scripts\bootstrap.js" />

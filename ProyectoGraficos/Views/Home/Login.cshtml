@@ -15,46 +15,55 @@
     <title>Login</title>
 </head>
 <body class="bg-light">
-    <div class="wrapper">
-        <div class="formcontent">
-            <form method="post" action="@Url.Action("Acceder", "Home")">
-                <div class="form-control">
-                    <div class="row">
-                        <h2 class="h2">Login</h2>
-                    </div>
-                    <div>
-                        <label for="tbUsuario">Usuario:</label>
-                        <input type="text" id="tbUsuario" class="form-control" name="usuario" placeholder="Nombre de Usuario" />
-                    </div>
-                    <div>
-                        <label for="tbPassword">Password:</label>
-                        <input type="password" id="tbPassword" class="form-control" name="pass" placeholder="Password" />
-                    </div>
-                    <hr />
-                    <div class="row">
-                        <label class="alert-danger" id="lblError"></label>
-                    </div>
-                    <div>
-                        @if (TempData["SuccessMessage"] != null)
-                        {
-                            <label style="color: green;">@TempData["SuccessMessage"]</label><br />
-                        }
-
-                        @if (TempData["Error"] != null)
-                        {
-                            <label style="color: red;">@TempData["Error"]</label><br />
-                        }
-                    </div>
-                    <div class="row">
-                        <button id="BtnAcceder" class="btn btn-primary btn-dark" type="submit">Acceder</button>
-                    </div>
-                    <div class="row text-center">
-                        <a id="lnkRegistrarse" href="@Url.Action("Registro", "Home")">Registrarse</a>
-                    </div>
-
-                </div>
-            </form>
+    <div class="header">
+        <div class="container">
+            <h1 class="encabezado">Proyecto panel solar - IES José Planes</h1>
         </div>
+        <div class="wrapper">
+            <div class="formcontent">
+                <form method="post" action="@Url.Action("Acceder", "Home")">
+                    <div class="form-control">
+                        <div class="row">
+                            <h2 class="h2">Login</h2>
+                        </div>
+                        <div>
+                            <label for="tbUsuario">Usuario:</label>
+                            <input type="text" id="tbUsuario" class="form-control" name="usuario" placeholder="Nombre de Usuario" />
+                        </div>
+                        <div>
+                            <label for="tbPassword">Password:</label>
+                            <input type="password" id="tbPassword" class="form-control" name="pass" placeholder="Password" />
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <label class="alert-danger" id="lblError"></label>
+                        </div>
+                        <div>
+                            @if (TempData["SuccessMessage"] != null)
+                            {
+                                <label style="color: green;">@TempData["SuccessMessage"]</label><br />
+                            }
+
+                            @if (TempData["Error"] != null)
+                            {
+                                <label style="color: red;">@TempData["Error"]</label><br />
+                            }
+                        </div>
+                        <div class="row">
+                            <button id="BtnAcceder" class="btn btn-primary btn-dark" type="submit">Acceder</button>
+                        </div>
+                        <div class="row text-center">
+                            <a id="lnkRegistrarse" href="@Url.Action("Registro", "Home")">Registrarse</a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <footer>
+            <div class="row text-center">
+                <p>© 2023 Eduardo Breitkopf Weisz.</p>
+            </div>
+        </footer>
     </div>
 </body>
 
