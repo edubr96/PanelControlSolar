@@ -77,6 +77,8 @@ namespace PanelControlSolar.Datos
             // Crear un array para almacenar las temperaturas
             string[] temperaturas = new string[fechas.Length];
 
+            bool sumaGrado = false;
+
             // Obtener las temperaturas para cada día en el rango especificado
             for (int i = 0; i < fechas.Length; i++)
             {
@@ -90,14 +92,19 @@ namespace PanelControlSolar.Datos
                 JObject json = JObject.Parse(weatherData);
                 int temp = Convert.ToInt32(json["temp_c"].ToString());
 
-                //Generamos una temperatura aleatoria debido a la limitación de la API
-                Random random = new Random();
-                int randomOffset = random.Next(-5, 6); // Genera un número aleatorio entre -5 y +5 (ambos inclusive)
-                int temperatura = temp + randomOffset; // Suma el número aleatorio a 'temp'
-
+                if (sumaGrado)
+                {
+                    temp += 1;
+                    sumaGrado = false;
+                }
+                else { 
+                    
+                    temp -= 1; 
+                    sumaGrado = true;
+                }
 
                 // Almacenar la temperatura en el array
-                temperaturas[i] = temperatura.ToString();
+                temperaturas[i] = temp.ToString();
             }
 
             // Devolver el array de temperaturas

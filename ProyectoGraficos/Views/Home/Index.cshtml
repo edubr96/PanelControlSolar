@@ -51,9 +51,9 @@
     </div>
     <div class="col-lg-6">
         <div class="panel panel-default" style="margin-bottom:33px">
-            <div class="panel-heading"><b>Temperatura actual</b> </div>
+            <div class="panel-heading"><b>Temperatura media</b> </div>
             <div class="panel-body" style="text-align:center">
-                <label id="temperatura" style="font-size: 30px;">@PanelControlSolar.Datos.API_DatosTiempo.temperaturaActual ºC</label>
+                <label id="temperatura" style="font-size: 30px;"></label>
                 <img src="~/Resources/images/termometro.png" alt="Producción total" style="vertical-align: middle; height:90px">
             </div>
         </div>
@@ -226,6 +226,7 @@
                   //*******************************************************************************/
 
                   // Datos API
+
                   $.ajax({
                      url: '@Url.Action("DatosTiempo", "Home")',
                      type: "GET",
@@ -244,7 +245,6 @@
                        var arrayPotencia = [];
 
                        var rMaxima = [];
-                       var rMedia = [];
                        var rMinima = [];
 
                        for (var i = 0; i < data.length; i++) {
@@ -260,43 +260,61 @@
                          data: { fechas: arrayFecha },
                          success: function (segundaData) {
 
-                         // Depuración
-                         console.log('Rmaxima: ' + rMaxima);
-                         console.log('Data temperaturas: ' + segundaData);
+                         //Array para almacenar las temperaturas
+                         var suma = [];
+                         var factor = 0;
 
                          for (var i = 0; i < segundaData.length; i++) {
 
-                         var temperatura = parseInt(segundaData[i]);
-                         rMaxima.push(data[i].Potencia + (temperatura * 0.5));
-                         rMedia.push(data[i].Potencia + (temperatura * 0.2));
-                         rMinima.push(data[i].Potencia - (temperatura * 0.5));
+                             var temperatura = parseInt(segundaData[i]);
+
+                             if (isNaN(suma[i])) {
+                                 suma[i] = 0; // Inicializa el elemento si no tiene un valor numérico
+                             }
+
+                             suma[i] += temperatura;
+
+                             //En condiciones ideales y con una temperatura de 25 grados, se espera el máximo rendimiento.
+                             if (temperatura >= 25) factor = 0.6;
+                             else factor = 0.5;
+
+                             if (data[i].Potencia == 0 || data[i].Potencia > 85) {
+                                 factor = 0; temperatura = 0;
+                             }
+                             rMaxima.push(data[i].Potencia + (temperatura * factor));                           
+                             rMinima.push(data[i].Potencia - (temperatura * factor));
+
                          }
+
+                         //Temperatura media en el rango
+                         var media = suma.reduce(function (a, b) {
+                             return a + b;
+                         }, 0) / segundaData.length;
+
+                         var etiquetaTemperatura = document.getElementById('temperatura');
+                         etiquetaTemperatura.textContent = media.toFixed(2) + ' ºC';
+
 
                            var TiempoActual = document.getElementById("TiempoActual");
                            var TiempoActual = new Chart(TiempoActual, {
                              type: 'line',
                              data: {
                                labels: arrayFecha,
-                               datasets: [{
-                                 label: "Potencia obtenida (W)",
-                                 backgroundColor: "",
-                                 borderColor: "#000000",
-                                 borderWidth: 1,
-                                 data: arrayPotencia,
-                               }, {
-                                 label: "Potencia máxima",
+                                 datasets: [{
+
+                                 label: "Potencia máxima (W)",
                                  backgroundColor: 'rgba(255, 0, 0, 0.5)',
                                  borderColor: 'rgba(255, 0, 0, 1)',
                                  borderWidth: 1,
                                  data: rMaxima,
                                }, {
-                                 label: "Potencia media",
+                                 label: "Potencia obtenida (W)",
                                  backgroundColor: 'rgba(255, 255, 0, 0.5)',
                                  borderColor: 'rgba(255, 255, 0, 1)',
-                                 borderWidth: 1,
-                                 data: rMedia,
+                                   borderWidth: 1,
+                                   data: arrayPotencia,
                                }, {
-                                 label: "Potencia mínima",
+                                 label: "Potencia mínima (W)",
                                  backgroundColor: 'rgba(0, 255, 0, 0.7)',
                                  borderColor: 'rgba(0, 255, 0, 1)',
                                  borderWidth: 1,
