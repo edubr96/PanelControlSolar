@@ -255,8 +255,9 @@
                        // Realizamos la segunda llamada dentro del bloque success de la primera llamada (rescatamos los datos de la API)
                        $.ajax({
                          url: '@Url.Action("APIDatosTiempo", "Home")',
-                         type: 'POST',
+                         type: 'GET',
                          dataType: 'json',
+                         traditional: true,
                          data: { fechas: arrayFecha },
                          success: function (segundaData) {
 

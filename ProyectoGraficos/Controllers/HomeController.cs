@@ -63,7 +63,7 @@ namespace PanelControlSolar.Controllers
             return Json(objLista, JsonRequestBehavior.AllowGet);
         }
 
-        [HttpPost]
+        [HttpGet]
         public JsonResult APIDatosTiempo(string[] fechas)
         {
             API_DatosTiempo api = new API_DatosTiempo();

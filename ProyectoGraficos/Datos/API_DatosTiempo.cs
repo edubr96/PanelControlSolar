@@ -52,6 +52,7 @@ namespace PanelControlSolar.Datos
         {
             string fechaFormateada = fecha.ToString("yyyy.MM.dd");
 
+            //Limitacion api. Usaremos el dia actual.
             string apiUrl = $"http://api.weatherunlocked.com/api/trigger/es.{zipCode}/forecast {fechaFormateada} ?app_id={APPId}&app_key={APIKey}";
             apiUrl = $"http://api.weatherunlocked.com/api/current/es.{zipCode}?app_id={APPId}&app_key={APIKey}";
 
@@ -82,15 +83,8 @@ namespace PanelControlSolar.Datos
             // Obtener las temperaturas para cada día en el rango especificado
             for (int i = 0; i < fechas.Length; i++)
             {
-                // Calcular la fecha del día actual en el bucle
-                DateTime fechaDia = Convert.ToDateTime(fechas[i]);
-
-                // Obtener los datos del clima para el código postal y fecha especificados
-                string weatherData = GetWeatherDataPorFecha(CodigoPostal.Codigopostal, fechaDia);
-
-                // Procesar los datos del clima para obtener la temperatura
-                JObject json = JObject.Parse(weatherData);
-                int temp = Convert.ToInt32(json["temp_c"].ToString());
+                
+                int temp = Convert.ToInt32(temperaturaActual);
 
                 if (sumaGrado)
                 {
